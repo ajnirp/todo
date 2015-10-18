@@ -1,0 +1,139 @@
+#!/usr/bin/env python
+
+# dependencies
+# python2
+# xsel
+
+import os
+import os.path
+import readline
+import signal
+
+def show_help():
+    print '''    + <String> - Add a TODO entry
+    - <Int> - Delete the entry
+    e <Int> - Edit an entry
+    c <Int> - Add an entry to the clipboard
+    ?, h - Show help
+    q - Quit'''
+
+HOME_DIR = os.path.expanduser('~')
+TODO_FILE = HOME_DIR + '/.todo'
+
+def show_todo():
+    print '\n------------------------------\n'
+    print 'Current TODO list\n'
+    for idx, item in enumerate(todo):
+        print idx, item
+
+def save_to_disk():
+    global todo
+    print 'Saving to disk...',
+    with open(TODO_FILE, 'w') as f:
+        for item in todo:
+            f.write(item)
+            f.write('\n')
+    print 'done'
+
+def read_from_disk():
+    with open(TODO_FILE, 'r') as f:
+        lines = f.readlines()
+        return [line.strip() for line in lines]
+
+def exit_cleanly():
+    save_to_disk()
+    print 'Exiting'
+    exit(0)
+
+# TODO: this should account for all kinds of changes
+# not just additions
+def undo_last():
+    history.pop()
+    todo = history[-1]
+
+def add_item(line):
+    global todo
+    try:
+        item = line[2:].strip()
+        todo.append(item)
+        print 'Added item:', item
+    except IndexError:
+        print 'to add a new item, write "+ <item>"'
+
+def delete_item(line):
+    global todo
+    try:
+        idx = int(line.split()[1])
+        item = todo[idx]
+        del todo[idx]
+        print 'Deleted item:', item
+    except IndexError:
+        print "can't delete that"
+
+def edit_item(line):
+    global todo
+    try:
+        split = line.split()
+        idx = int(split[1])
+        new_item = ' '.join(split[2:])
+        old_item = todo[idx]
+        todo[idx] = new_item
+        print 'Edited item'
+        print 'Before:', old_item
+        print 'Now:', new_item
+    except IndexError:
+        print "can't edit that"
+
+def copy_to_clipboard(line):
+    global todo
+    try:
+        idx = int(line.split()[1])
+        item = todo[idx]
+        copy_command = "printf \"" + item + "\" | xsel -ib"
+        os.system(copy_command)
+        print 'Copied item:', item
+    except IndexError:
+        print "can't copy that"
+
+def handle_input(s):
+    global todo
+    if s[0] in ['?', 'h']:
+        show_help()
+    elif s[0] == '+':
+        add_item(s)
+    elif s[0] == '-':
+        delete_item(s)
+    elif s[0] == 'c':
+        copy_to_clipboard(s)
+    elif s[0] == 'e':
+        edit_item(s)
+    elif s[0] == 'u':
+        undo_last()
+    elif s[0] == 'q':
+        exit_cleanly()
+
+def sigint_handler(signal, frame):
+    print
+    exit_cleanly()
+
+# stack for supporting undo
+history = []
+
+# TODO: instead of storing versions of the todo list in the stack,
+# store only the diffs in the stack. this saves space.
+
+# TODO: use the Pastebin API for cloud backup
+
+signal.signal(signal.SIGINT, sigint_handler)
+todo = read_from_disk()
+
+show_help()
+while True:
+    show_todo()
+    print
+    try:
+        inp = raw_input("command: ")
+    except EOFError:
+        exit_cleanly()
+    print
+    handle_input(inp)
