@@ -62,6 +62,7 @@ def exit_cleanly():
 # TODO: this should account for all kinds of changes
 # not just additions
 def undo_last():
+    global history
     history.pop()
     todo = history[-1]
 
@@ -130,14 +131,6 @@ def handle_input(s):
 def sigint_handler(signal, frame):
     print
     exit_cleanly()
-
-# stack for supporting undo
-history = []
-
-# TODO: instead of storing versions of the todo list in the stack,
-# store only the diffs in the stack. this saves space.
-
-# TODO: use the Pastebin API for cloud backup
 
 signal.signal(signal.SIGINT, sigint_handler)
 todo = read_from_disk()
