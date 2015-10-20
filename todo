@@ -9,6 +9,20 @@ import os.path
 import readline
 import signal
 
+def input_with_prefill(prompt, text):
+    def hook():
+        readline.insert_text(text)
+        readline.redisplay()
+    readline.set_pre_input_hook(hook)
+    result = raw_input(prompt)
+    readline.set_pre_input_hook()
+    return result
+
+def pop_readline_history():
+    current_history_length = readline.get_current_history_length()
+    print 'current_history_length', current_history_length
+    readline.remove_history_item(current_history_length - 1)
+
 def show_help():
     print '''    + <String> - Add a TODO entry
     - <Int> - Delete the entry
@@ -75,12 +89,13 @@ def edit_item(line):
     try:
         split = line.split()
         idx = int(split[1])
-        new_item = ' '.join(split[2:])
         old_item = todo[idx]
+        new_item = input_with_prefill('edit item: ', old_item)
         todo[idx] = new_item
         print 'Edited item'
         print 'Before:', old_item
         print 'Now:', new_item
+        pop_readline_history()
     except IndexError:
         print "can't edit that"
 
