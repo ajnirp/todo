@@ -20,7 +20,6 @@ def input_with_prefill(prompt, text):
 
 def pop_readline_history():
     current_history_length = readline.get_current_history_length()
-    print 'current_history_length', current_history_length
     readline.remove_history_item(current_history_length - 1)
 
 def show_help():
