@@ -52,7 +52,13 @@ def save_to_disk():
             f.write('\n')
     print 'done'
 
+def create_if_doesnt_exist(filename):
+    if not os.path.isfile(filename):
+        with open(filename, 'w') as f:
+            pass
+
 def read_from_disk():
+    create_if_doesnt_exist(TODO_FILE)
     with open(TODO_FILE, 'r') as f:
         lines = f.readlines()
         return [line.strip() for line in lines]
