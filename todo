@@ -14,8 +14,12 @@ def input_with_prefill(prompt, text):
         readline.insert_text(text)
         readline.redisplay()
     readline.set_pre_input_hook(hook)
-    result = raw_input(prompt)
-    readline.set_pre_input_hook()
+    try:
+        result = raw_input(prompt)
+    except EOFError:
+        return None
+    finally:
+        readline.set_pre_input_hook()
     return result
 
 def pop_readline_history():
@@ -87,16 +91,21 @@ def delete_item(line):
 def edit_item(line):
     global todo
     try:
-        split = line.split()
+        split = line.split(' ', 2)
         idx = int(split[1])
         old_item = todo[idx]
-        new_item = input_with_prefill('edit item: ', old_item)
+        prefill = old_item
+        if len(split) > 2:
+            prefill = split[2]
+        new_item = input_with_prefill('edit item: ', prefill)
+        if new_item is None:
+            raise TypeError
         todo[idx] = new_item
         print 'Edited item'
         print 'Before:', old_item
         print 'Now:', new_item
         pop_readline_history()
-    except IndexError:
+    except (IndexError, TypeError):
         print "can't edit that"
 
 def copy_to_clipboard(line):
