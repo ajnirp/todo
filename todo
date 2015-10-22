@@ -81,6 +81,7 @@ def exit_cleanly():
     save_to_disk()
     print 'Exiting'
     release_lock()
+    os.system("clear")
     exit(0)
 
 # TODO: this should account for all kinds of changes
@@ -180,6 +181,7 @@ def sigint_handler(signal, frame):
     exit_cleanly()
 
 if __name__ == '__main__':
+    os.system("clear")
     acquire_lock()
 
     signal.signal(signal.SIGINT, sigint_handler)
