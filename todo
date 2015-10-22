@@ -4,10 +4,27 @@
 # python2
 # xsel
 
+import fcntl
 import os
 import os.path
 import readline
 import signal
+import sys
+
+HOME_DIR = os.path.expanduser('~')
+TODO_FILE = HOME_DIR + '/.todo'
+PID_FILE = HOME_DIR + '/todo.pid'
+PID_FILE_DESCRIPTOR = open(PID_FILE, 'r+')
+
+def acquire_lock():
+    try:
+        fcntl.lockf(PID_FILE_DESCRIPTOR, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except IOError as err:
+        print >> sys.stderr, 'error: another instance of this program is already running'
+        exit(1)
+
+def release_lock():
+    fcntl.lockf(PID_FILE_DESCRIPTOR, fcntl.LOCK_UN)
 
 def input_with_prefill(prompt, text):
     def hook():
@@ -33,9 +50,6 @@ def show_help():
     c <Int> - Add an entry to the clipboard
     ?, h - Show help
     q - Quit'''
-
-HOME_DIR = os.path.expanduser('~')
-TODO_FILE = HOME_DIR + '/.todo'
 
 def show_todo():
     print '\n------------------------------\n'
@@ -66,6 +80,7 @@ def read_from_disk():
 def exit_cleanly():
     save_to_disk()
     print 'Exiting'
+    release_lock()
     exit(0)
 
 # TODO: this should account for all kinds of changes
@@ -145,6 +160,8 @@ def handle_input(s):
 def sigint_handler(signal, frame):
     print
     exit_cleanly()
+
+acquire_lock()
 
 signal.signal(signal.SIGINT, sigint_handler)
 todo = read_from_disk()
