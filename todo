@@ -3,11 +3,14 @@
 # dependencies
 # python2
 # xsel
+# requests
 
 import fcntl
+import json
 import os
 import os.path
 import readline
+import requests
 import signal
 import sys
 
@@ -15,6 +18,37 @@ HOME_DIR = os.path.expanduser('~')
 TODO_FILE = HOME_DIR + '/.todo'
 PID_FILE = HOME_DIR + '/todo.pid'
 PID_FILE_DESCRIPTOR = open(PID_FILE, 'r+')
+GITHUB_API = 'https://api.github.com/gists'
+
+# Generate the payload for a POST request
+# for uploading to Github
+def generate_payload():
+    global todo
+    with open(TODO_FILE) as f:
+        file_dump = f.read()
+    return {
+        "description": "TODO list",
+        "files": {
+            "todo.txt": {
+                "content": file_dump
+            }
+        }
+    }
+
+def make_post_request():
+    payload = generate_payload()
+    data = json.dumps(payload)
+    response = requests.post(GITHUB_API, data=data)
+    return response
+
+def parse_response(response):
+    if response.status_code != 200:
+        print r.text
+        return
+
+    text = response.text
+    response_dict = json.loads(text)
+    return response_dict["html_url"]
 
 def acquire_lock():
     try:
@@ -156,6 +190,10 @@ def search(line):
     except IndexError:
         print "error in search command"
 
+def upload_todo():
+    global todo
+    make_post_request()
+
 def handle_input(s):
     global todo
     os.system("clear")
@@ -171,6 +209,8 @@ def handle_input(s):
         edit_item(s)
     elif s[0] == '/':
         search(s)
+    elif s[0] == 'g':
+        upload_todo()
     elif s[0] == 'u':
         undo_last()
     elif s[0] == 'q':
