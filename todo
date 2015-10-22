@@ -140,8 +140,24 @@ def copy_to_clipboard(line):
     except IndexError:
         print "can't copy that"
 
+def search(line):
+    global todo
+    try:
+        split = line.split()
+        query = split[1]
+        matches_found = False
+        for idx, item in enumerate(todo):
+            if query in item:
+                matches_found = True
+                print 'match:', idx, item
+        if not matches_found:
+            print 'no matches found'
+    except IndexError:
+        print "error in search command"
+
 def handle_input(s):
     global todo
+    os.system("clear")
     if s[0] in ['?', 'h']:
         show_help()
     elif s[0] == '+':
@@ -152,6 +168,8 @@ def handle_input(s):
         copy_to_clipboard(s)
     elif s[0] == 'e':
         edit_item(s)
+    elif s[0] == '/':
+        search(s)
     elif s[0] == 'u':
         undo_last()
     elif s[0] == 'q':
