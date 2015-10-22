@@ -161,18 +161,19 @@ def sigint_handler(signal, frame):
     print
     exit_cleanly()
 
-acquire_lock()
+if __name__ == '__main__':
+    acquire_lock()
 
-signal.signal(signal.SIGINT, sigint_handler)
-todo = read_from_disk()
+    signal.signal(signal.SIGINT, sigint_handler)
+    todo = read_from_disk()
 
-show_help()
-while True:
-    show_todo()
-    print
-    try:
-        inp = raw_input("command: ")
-    except EOFError:
-        exit_cleanly()
-    print
-    handle_input(inp)
+    show_help()
+    while True:
+        show_todo()
+        print
+        try:
+            inp = raw_input("command: ")
+        except EOFError:
+            exit_cleanly()
+        print
+        handle_input(inp)
