@@ -190,6 +190,16 @@ def search(line):
     except IndexError:
         print "error in search command"
 
+def swap_items(line):
+    global todo
+    try:
+        split = line.split()
+        first, second = int(split[1]), int(split[2])
+        todo[first], todo[second] = todo[second], todo[first]
+        print 'Swapped items:', first, 'and', second
+    except IndexError:
+        print "can't swap items"
+
 def upload_todo():
     global todo
     make_post_request()
@@ -213,6 +223,8 @@ def handle_input(s):
         upload_todo()
     elif s[0] == 'u':
         undo_last()
+    elif s[0] == 's':
+        swap_items(s)
     elif s[0] == 'q':
         exit_cleanly()
 
