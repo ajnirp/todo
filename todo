@@ -132,7 +132,7 @@ def add_item(line):
         todo.append(item)
         print 'Added item:', item
     except IndexError:
-        print 'to add a new item, write "+ <item>"'
+        print >> sys.stderr, 'to add a new item, write "+ <item>"'
 
 def delete_item(line):
     global todo
@@ -142,7 +142,7 @@ def delete_item(line):
         del todo[idx]
         print 'Deleted item:', item
     except IndexError:
-        print "can't delete that"
+        print >> sys.stderr, "can't delete that"
 
 def edit_item(line):
     global todo
@@ -162,7 +162,7 @@ def edit_item(line):
         print 'Now:', new_item
         pop_readline_history()
     except (IndexError, TypeError):
-        print "can't edit that"
+        print >> sys.stderr, "can't edit that"
 
 def copy_to_clipboard(line):
     global todo
@@ -173,7 +173,7 @@ def copy_to_clipboard(line):
         os.system(copy_command)
         print 'Copied item:', item
     except IndexError:
-        print "can't copy that"
+        print >> sys.stderr, "can't copy that"
 
 def search(line):
     global todo
@@ -188,7 +188,7 @@ def search(line):
         if not matches_found:
             print 'no matches found'
     except IndexError:
-        print "error in search command"
+        print >> sys.stderr, "error in search command"
 
 def swap_items(line):
     global todo
@@ -198,7 +198,7 @@ def swap_items(line):
         todo[first], todo[second] = todo[second], todo[first]
         print 'Swapped items:', first, 'and', second
     except IndexError:
-        print "can't swap items"
+        print >> sys.stderr, "can't swap items"
 
 def upload_todo():
     global todo
