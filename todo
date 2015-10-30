@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # dependencies
-# python2
+# python3
 # xsel
 # requests
 
@@ -43,7 +43,7 @@ def make_post_request():
 
 def parse_response(response):
     if response.status_code != 200:
-        print r.text
+        print(r.text)
         return
 
     text = response.text
@@ -54,7 +54,7 @@ def acquire_lock():
     try:
         fcntl.lockf(PID_FILE_DESCRIPTOR, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except IOError as err:
-        print >> sys.stderr, 'error: another instance of this program is already running'
+        print('error: another instance of this program is already running', file=sys.stderr)
         exit(1)
 
 def release_lock():
@@ -66,7 +66,7 @@ def input_with_prefill(prompt, text):
         readline.redisplay()
     readline.set_pre_input_hook(hook)
     try:
-        result = raw_input(prompt)
+        result = input(prompt)
     except EOFError:
         return None
     finally:
@@ -78,27 +78,27 @@ def pop_readline_history():
     readline.remove_history_item(current_history_length - 1)
 
 def show_help():
-    print '''    + <String> - Add a TODO entry
+    print('''    + <String> - Add a TODO entry
     - <Int> - Delete the entry
     e <Int> - Edit an entry
     c <Int> - Add an entry to the clipboard
     ?, h - Show help
-    q - Quit'''
+    q - Quit''')
 
 def show_todo():
-    print '\n------------------------------\n'
-    print 'Current TODO list\n'
+    print('\n------------------------------\n')
+    print('Current TODO list\n')
     for idx, item in enumerate(todo):
-        print idx, item
+        print(idx, item)
 
 def save_to_disk():
     global todo
-    print 'Saving to disk...',
+    print('Saving to disk...',)
     with open(TODO_FILE, 'w') as f:
         for item in todo:
             f.write(item)
             f.write('\n')
-    print 'done'
+    print('done')
 
 def create_if_doesnt_exist(filename):
     if not os.path.isfile(filename):
@@ -113,7 +113,7 @@ def read_from_disk():
 
 def exit_cleanly():
     save_to_disk()
-    print 'Exiting'
+    print('Exiting')
     release_lock()
     os.system("clear")
     exit(0)
@@ -130,9 +130,9 @@ def add_item(line):
     try:
         item = line[2:].strip()
         todo.append(item)
-        print 'Added item:', item
+        print('Added item:', item)
     except IndexError:
-        print >> sys.stderr, 'to add a new item, write "+ <item>"'
+        print('to add a new item, write "+ <item>"', file=sys.stderr)
 
 def delete_item(line):
     global todo
@@ -140,9 +140,9 @@ def delete_item(line):
         idx = int(line.split()[1])
         item = todo[idx]
         del todo[idx]
-        print 'Deleted item:', item
+        print('Deleted item:', item)
     except IndexError:
-        print >> sys.stderr, "can't delete that"
+        print("can't delete that", file=sys.stderr)
 
 def edit_item(line):
     global todo
@@ -157,12 +157,12 @@ def edit_item(line):
         if new_item is None:
             raise TypeError
         todo[idx] = new_item
-        print 'Edited item'
-        print 'Before:', old_item
-        print 'Now:', new_item
+        print('Edited item')
+        print('Before:', old_item)
+        print('Now:', new_item)
         pop_readline_history()
     except (IndexError, TypeError):
-        print >> sys.stderr, "can't edit that"
+        print("can't edit that", file=sys.stderr)
 
 def copy_to_clipboard(line):
     global todo
@@ -171,9 +171,9 @@ def copy_to_clipboard(line):
         item = todo[idx]
         copy_command = "printf \"" + item + "\" | xsel -ib"
         os.system(copy_command)
-        print 'Copied item:', item
+        print('Copied item:', item)
     except IndexError:
-        print >> sys.stderr, "can't copy that"
+        print("can't copy that", file=sys.stderr)
 
 def search(line):
     global todo
@@ -184,11 +184,11 @@ def search(line):
         for idx, item in enumerate(todo):
             if query in item:
                 matches_found = True
-                print 'match:', idx, item
+                print('match:', idx, item)
         if not matches_found:
-            print 'no matches found'
+            print('no matches found', file=sys.stderr)
     except IndexError:
-        print >> sys.stderr, "error in search command"
+        print("error in search command", file=sys.stderr)
 
 def swap_items(line):
     global todo
@@ -196,9 +196,9 @@ def swap_items(line):
         split = line.split()
         first, second = int(split[1]), int(split[2])
         todo[first], todo[second] = todo[second], todo[first]
-        print 'Swapped items:', first, 'and', second
+        print('Swapped items:', first, 'and', second)
     except IndexError:
-        print >> sys.stderr, "can't swap items"
+        print("can't swap items", file=sys.stderr)
 
 def upload_todo():
     global todo
@@ -244,8 +244,8 @@ if __name__ == '__main__':
         show_todo()
         print
         try:
-            inp = raw_input("command: ")
+            inp = input("command: ")
         except EOFError:
             exit_cleanly()
-        print
+        print()
         handle_input(inp)
